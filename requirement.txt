@@ -1,0 +1,8 @@
+onnxruntime
+transformers
+opencv-python
+Pillow
+numpy
+pandas
+matplotlib
+pygame

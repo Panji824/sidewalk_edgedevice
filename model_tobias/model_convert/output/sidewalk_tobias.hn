@@ -1,0 +1,4379 @@
+{
+    "name": "sidewalk_tobias",
+    "net_params": {
+        "version": "1.0",
+        "stage": "HN",
+        "clusters_placement": [[]],
+        "clusters_to_skip": [],
+        "output_layers_order": ["sidewalk_tobias/conv64"],
+        "is_transformer": true,
+        "transposed_net": false,
+        "net_scopes": ["sidewalk_tobias"],
+        "lora_adapters": []
+    },
+    "layers": {
+        "sidewalk_tobias/input_layer1": {
+            "type": "input_layer",
+            "input": [],
+            "output": ["sidewalk_tobias/external_pad1"],
+            "input_shapes": [[-1, 224, 224, 3]],
+            "output_shapes": [[-1, 224, 224, 3]],
+            "original_names": ["pixel_values"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "transposed": false,
+            "engine": "nn_core",
+            "io_type": "standard"
+        },
+        "sidewalk_tobias/external_pad1": {
+            "type": "external_pad",
+            "input": ["sidewalk_tobias/input_layer1"],
+            "output": ["sidewalk_tobias/conv1"],
+            "input_shapes": [[-1, 224, 224, 3]],
+            "output_shapes": [[-1, 230, 230, 3]],
+            "original_names": ["node_conv2d"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "external_pad_params": [3, 3, 3, 3, 0, 0]
+            }
+        },
+        "sidewalk_tobias/conv1": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/external_pad1"],
+            "output": ["sidewalk_tobias/format_conversion1"],
+            "input_shapes": [[-1, 230, 230, 3]],
+            "output_shapes": [[-1, 56, 56, 32]],
+            "original_names": ["node_conv2d"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [7, 7, 3, 32],
+                "strides": [1, 4, 4, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion1": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv1"],
+            "output": ["sidewalk_tobias/layer_normalization1"],
+            "input_shapes": [[-1, 56, 56, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_view", "node_transpose"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 3136, 32],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/layer_normalization1": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/format_conversion1"],
+            "output": ["sidewalk_tobias/normalization1"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_layer_norm"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization1": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization1"],
+            "output": ["sidewalk_tobias/layer_normalization2", "sidewalk_tobias/ew_add1"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32], [-1, 1, 3136, 32]],
+            "original_names": ["node_layer_norm"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization2": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/normalization1"],
+            "output": ["sidewalk_tobias/normalization2"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_layer_norm_1", "node_transpose_2"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization2": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization2"],
+            "output": ["sidewalk_tobias/conv2", "sidewalk_tobias/format_conversion2"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32], [-1, 1, 3136, 32]],
+            "original_names": ["node_layer_norm_1", "node_transpose_2"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv2": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization2"],
+            "output": ["sidewalk_tobias/mul_and_add1"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_MatMul_6", "node_linear", "node_view_1", "node_transpose_1"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 32, 32],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion2": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/normalization2"],
+            "output": ["sidewalk_tobias/conv3"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 56, 56, 32]],
+            "original_names": ["node_view_2"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [56, 56, 32],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/conv3": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/format_conversion2"],
+            "output": ["sidewalk_tobias/format_conversion3"],
+            "input_shapes": [[-1, 56, 56, 32]],
+            "output_shapes": [[-1, 7, 7, 32]],
+            "original_names": ["node_conv2d_1"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [8, 8, 32, 32],
+                "strides": [1, 8, 8, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion3": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv3"],
+            "output": ["sidewalk_tobias/layer_normalization3"],
+            "input_shapes": [[-1, 7, 7, 32]],
+            "output_shapes": [[-1, 1, 49, 32]],
+            "original_names": ["node_view_3", "node_transpose_3"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 49, 32],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/layer_normalization3": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/format_conversion3"],
+            "output": ["sidewalk_tobias/normalization3"],
+            "input_shapes": [[-1, 1, 49, 32]],
+            "output_shapes": [[-1, 1, 49, 32]],
+            "original_names": ["node_layer_norm_2"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/mul_and_add1": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv2"],
+            "output": ["sidewalk_tobias/matmul1"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_Mul_57"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/normalization3": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization3"],
+            "output": ["sidewalk_tobias/conv4", "sidewalk_tobias/conv5"],
+            "input_shapes": [[-1, 1, 49, 32]],
+            "output_shapes": [[-1, 1, 49, 32], [-1, 1, 49, 32]],
+            "original_names": ["node_layer_norm_2"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv4": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization3"],
+            "output": ["sidewalk_tobias/mul_and_add2"],
+            "input_shapes": [[-1, 1, 49, 32]],
+            "output_shapes": [[-1, 1, 32, 49]],
+            "original_names": ["node_MatMul_25", "node_linear_1", "node_view_4", "node_transpose_4", "node_Reshape_52", "node_Transpose_53", "node_Reshape_55"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "transpose_output_width_features": true,
+                "kernel_shape": [1, 1, 32, 32],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv5": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization3"],
+            "output": ["sidewalk_tobias/matmul2"],
+            "input_shapes": [[-1, 1, 49, 32]],
+            "output_shapes": [[-1, 1, 49, 32]],
+            "original_names": ["node_MatMul_33", "node_linear_2", "node_view_5", "node_transpose_5"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 32, 32],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/mul_and_add2": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv4"],
+            "output": ["sidewalk_tobias/matmul1"],
+            "input_shapes": [[-1, 1, 32, 49]],
+            "output_shapes": [[-1, 1, 32, 49]],
+            "original_names": ["node_Mul_60"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/matmul1": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/mul_and_add1", "sidewalk_tobias/mul_and_add2"],
+            "output": ["sidewalk_tobias/softmax1"],
+            "input_shapes": [[-1, 1, 3136, 32], [-1, 1, 32, 49]],
+            "output_shapes": [[-1, 1, 3136, 49]],
+            "original_names": ["node_MatMul_61"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": false,
+                "kernel_shape": [1, 1, 32, 49],
+                "groups": 1,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/softmax1": {
+            "type": "softmax",
+            "input": ["sidewalk_tobias/matmul1"],
+            "output": ["sidewalk_tobias/matmul2"],
+            "input_shapes": [[-1, 1, 3136, 49]],
+            "output_shapes": [[-1, 1, 3136, 49]],
+            "original_names": ["node_Softmax_62"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "groups": 1,
+                "logits_axis": 3
+            }
+        },
+        "sidewalk_tobias/matmul2": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/softmax1", "sidewalk_tobias/conv5"],
+            "output": ["sidewalk_tobias/conv6"],
+            "input_shapes": [[-1, 1, 3136, 49], [-1, 1, 49, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_scaled_dot_product_attention", "node_transpose_6", "node_view_6"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": false,
+                "kernel_shape": [1, 1, 49, 32],
+                "groups": 1,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv6": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/matmul2"],
+            "output": ["sidewalk_tobias/ew_add1"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_MatMul_69", "node_linear_3"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 32, 32],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add1": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv6", "sidewalk_tobias/normalization1"],
+            "output": ["sidewalk_tobias/layer_normalization4", "sidewalk_tobias/ew_add2"],
+            "input_shapes": [[-1, 1, 3136, 32], [-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32], [-1, 1, 3136, 32]],
+            "original_names": ["node_add"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization4": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add1"],
+            "output": ["sidewalk_tobias/normalization4"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_layer_norm_3"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization4": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization4"],
+            "output": ["sidewalk_tobias/conv7"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_layer_norm_3"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv7": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization4"],
+            "output": ["sidewalk_tobias/format_conversion4"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 128]],
+            "original_names": ["node_MatMul_71", "node_linear_4", "node_transpose_7"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 32, 128],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion4": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv7"],
+            "output": ["sidewalk_tobias/dw1"],
+            "input_shapes": [[-1, 1, 3136, 128]],
+            "output_shapes": [[-1, 56, 56, 128]],
+            "original_names": ["node_view_7"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [56, 56, 128],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/dw1": {
+            "type": "dw",
+            "input": ["sidewalk_tobias/format_conversion4"],
+            "output": ["sidewalk_tobias/format_conversion5"],
+            "input_shapes": [[-1, 56, 56, 128]],
+            "output_shapes": [[-1, 56, 56, 128]],
+            "original_names": ["node_conv2d_2"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [3, 3, 128, 1],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "SAME_TENSORFLOW",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion5": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/dw1"],
+            "output": ["sidewalk_tobias/activation1"],
+            "input_shapes": [[-1, 56, 56, 128]],
+            "output_shapes": [[-1, 1, 3136, 128]],
+            "original_names": ["node_view_8", "node_transpose_8"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 3136, 128],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/activation1": {
+            "type": "activation",
+            "input": ["sidewalk_tobias/format_conversion5"],
+            "output": ["sidewalk_tobias/conv8"],
+            "input_shapes": [[-1, 1, 3136, 128]],
+            "output_shapes": [[-1, 1, 3136, 128]],
+            "original_names": ["node_Div_84", "node_Erf_85", "node_Add_87", "node_Mul_89", "node_gelu"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "gelu"
+            }
+        },
+        "sidewalk_tobias/conv8": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/activation1"],
+            "output": ["sidewalk_tobias/ew_add2"],
+            "input_shapes": [[-1, 1, 3136, 128]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_MatMul_91", "node_linear_5"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 128, 32],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add2": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv8", "sidewalk_tobias/ew_add1"],
+            "output": ["sidewalk_tobias/layer_normalization5", "sidewalk_tobias/ew_add3"],
+            "input_shapes": [[-1, 1, 3136, 32], [-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32], [-1, 1, 3136, 32]],
+            "original_names": ["node_add_1"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization5": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add2"],
+            "output": ["sidewalk_tobias/normalization5"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_layer_norm_4", "node_transpose_10"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization5": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization5"],
+            "output": ["sidewalk_tobias/conv9", "sidewalk_tobias/format_conversion6"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32], [-1, 1, 3136, 32]],
+            "original_names": ["node_layer_norm_4", "node_transpose_10"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv9": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization5"],
+            "output": ["sidewalk_tobias/mul_and_add3"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_MatMul_93", "node_linear_6", "node_view_9", "node_transpose_9"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 32, 32],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion6": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/normalization5"],
+            "output": ["sidewalk_tobias/conv10"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 56, 56, 32]],
+            "original_names": ["node_view_10"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [56, 56, 32],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/conv10": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/format_conversion6"],
+            "output": ["sidewalk_tobias/format_conversion7"],
+            "input_shapes": [[-1, 56, 56, 32]],
+            "output_shapes": [[-1, 7, 7, 32]],
+            "original_names": ["node_conv2d_3"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [8, 8, 32, 32],
+                "strides": [1, 8, 8, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion7": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv10"],
+            "output": ["sidewalk_tobias/layer_normalization6"],
+            "input_shapes": [[-1, 7, 7, 32]],
+            "output_shapes": [[-1, 1, 49, 32]],
+            "original_names": ["node_view_11", "node_transpose_11"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 49, 32],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/layer_normalization6": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/format_conversion7"],
+            "output": ["sidewalk_tobias/normalization6"],
+            "input_shapes": [[-1, 1, 49, 32]],
+            "output_shapes": [[-1, 1, 49, 32]],
+            "original_names": ["node_layer_norm_5"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/mul_and_add3": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv9"],
+            "output": ["sidewalk_tobias/matmul3"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_Mul_141"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/normalization6": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization6"],
+            "output": ["sidewalk_tobias/conv11", "sidewalk_tobias/conv12"],
+            "input_shapes": [[-1, 1, 49, 32]],
+            "output_shapes": [[-1, 1, 49, 32], [-1, 1, 49, 32]],
+            "original_names": ["node_layer_norm_5"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv11": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization6"],
+            "output": ["sidewalk_tobias/mul_and_add4"],
+            "input_shapes": [[-1, 1, 49, 32]],
+            "output_shapes": [[-1, 1, 32, 49]],
+            "original_names": ["node_MatMul_112", "node_linear_7", "node_view_12", "node_transpose_12", "node_Reshape_136", "node_Transpose_137", "node_Reshape_139"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "transpose_output_width_features": true,
+                "kernel_shape": [1, 1, 32, 32],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv12": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization6"],
+            "output": ["sidewalk_tobias/matmul4"],
+            "input_shapes": [[-1, 1, 49, 32]],
+            "output_shapes": [[-1, 1, 49, 32]],
+            "original_names": ["node_MatMul_120", "node_linear_8", "node_view_13", "node_transpose_13"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 32, 32],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/mul_and_add4": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv11"],
+            "output": ["sidewalk_tobias/matmul3"],
+            "input_shapes": [[-1, 1, 32, 49]],
+            "output_shapes": [[-1, 1, 32, 49]],
+            "original_names": ["node_Mul_144"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/matmul3": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/mul_and_add3", "sidewalk_tobias/mul_and_add4"],
+            "output": ["sidewalk_tobias/softmax2"],
+            "input_shapes": [[-1, 1, 3136, 32], [-1, 1, 32, 49]],
+            "output_shapes": [[-1, 1, 3136, 49]],
+            "original_names": ["node_MatMul_145"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": false,
+                "kernel_shape": [1, 1, 32, 49],
+                "groups": 1,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/softmax2": {
+            "type": "softmax",
+            "input": ["sidewalk_tobias/matmul3"],
+            "output": ["sidewalk_tobias/matmul4"],
+            "input_shapes": [[-1, 1, 3136, 49]],
+            "output_shapes": [[-1, 1, 3136, 49]],
+            "original_names": ["node_Softmax_146"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "groups": 1,
+                "logits_axis": 3
+            }
+        },
+        "sidewalk_tobias/matmul4": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/softmax2", "sidewalk_tobias/conv12"],
+            "output": ["sidewalk_tobias/conv13"],
+            "input_shapes": [[-1, 1, 3136, 49], [-1, 1, 49, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_scaled_dot_product_attention_1", "node_transpose_14", "node_view_14"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": false,
+                "kernel_shape": [1, 1, 49, 32],
+                "groups": 1,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv13": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/matmul4"],
+            "output": ["sidewalk_tobias/ew_add3"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_MatMul_153", "node_linear_9"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 32, 32],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add3": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv13", "sidewalk_tobias/ew_add2"],
+            "output": ["sidewalk_tobias/layer_normalization7", "sidewalk_tobias/ew_add4"],
+            "input_shapes": [[-1, 1, 3136, 32], [-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32], [-1, 1, 3136, 32]],
+            "original_names": ["node_add_2"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization7": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add3"],
+            "output": ["sidewalk_tobias/normalization7"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_layer_norm_6"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization7": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization7"],
+            "output": ["sidewalk_tobias/conv14"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_layer_norm_6"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv14": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization7"],
+            "output": ["sidewalk_tobias/format_conversion8"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 128]],
+            "original_names": ["node_MatMul_155", "node_linear_10", "node_transpose_15"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 32, 128],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion8": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv14"],
+            "output": ["sidewalk_tobias/dw2"],
+            "input_shapes": [[-1, 1, 3136, 128]],
+            "output_shapes": [[-1, 56, 56, 128]],
+            "original_names": ["node_view_15"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [56, 56, 128],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/dw2": {
+            "type": "dw",
+            "input": ["sidewalk_tobias/format_conversion8"],
+            "output": ["sidewalk_tobias/format_conversion9"],
+            "input_shapes": [[-1, 56, 56, 128]],
+            "output_shapes": [[-1, 56, 56, 128]],
+            "original_names": ["node_conv2d_4"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [3, 3, 128, 1],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "SAME_TENSORFLOW",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion9": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/dw2"],
+            "output": ["sidewalk_tobias/activation2"],
+            "input_shapes": [[-1, 56, 56, 128]],
+            "output_shapes": [[-1, 1, 3136, 128]],
+            "original_names": ["node_view_16", "node_transpose_16"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 3136, 128],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/activation2": {
+            "type": "activation",
+            "input": ["sidewalk_tobias/format_conversion9"],
+            "output": ["sidewalk_tobias/conv15"],
+            "input_shapes": [[-1, 1, 3136, 128]],
+            "output_shapes": [[-1, 1, 3136, 128]],
+            "original_names": ["node_Div_168", "node_Erf_169", "node_Add_171", "node_Mul_173", "node_gelu_1"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "gelu"
+            }
+        },
+        "sidewalk_tobias/conv15": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/activation2"],
+            "output": ["sidewalk_tobias/ew_add4"],
+            "input_shapes": [[-1, 1, 3136, 128]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_MatMul_175", "node_linear_11"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 128, 32],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add4": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv15", "sidewalk_tobias/ew_add3"],
+            "output": ["sidewalk_tobias/layer_normalization8"],
+            "input_shapes": [[-1, 1, 3136, 32], [-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_add_3"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization8": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add4"],
+            "output": ["sidewalk_tobias/normalization8"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_layer_norm_7"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization8": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization8"],
+            "output": ["sidewalk_tobias/format_conversion10"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_layer_norm_7"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion10": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/normalization8"],
+            "output": ["sidewalk_tobias/conv16", "sidewalk_tobias/format_conversion11"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 56, 56, 32], [-1, 56, 56, 32]],
+            "original_names": ["node_view_17", "node_permute"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [56, 56, 32],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/conv16": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/format_conversion10"],
+            "output": ["sidewalk_tobias/format_conversion12"],
+            "input_shapes": [[-1, 56, 56, 32]],
+            "output_shapes": [[-1, 28, 28, 64]],
+            "original_names": ["node_conv2d_5"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [3, 3, 32, 64],
+                "strides": [1, 2, 2, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "SAME",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion11": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/format_conversion10"],
+            "output": ["sidewalk_tobias/conv17"],
+            "input_shapes": [[-1, 56, 56, 32]],
+            "output_shapes": [[-1, 1, 3136, 32]],
+            "original_names": ["node_view_68", "node_transpose_64"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 3136, 32],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/conv17": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/format_conversion11"],
+            "output": ["sidewalk_tobias/format_conversion13"],
+            "input_shapes": [[-1, 1, 3136, 32]],
+            "output_shapes": [[-1, 1, 3136, 256]],
+            "original_names": ["node_MatMul_703", "node_linear_48", "node_transpose_65"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 32, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion12": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv16"],
+            "output": ["sidewalk_tobias/layer_normalization9"],
+            "input_shapes": [[-1, 28, 28, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_view_18", "node_transpose_17"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 784, 64],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/format_conversion13": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv17"],
+            "output": ["sidewalk_tobias/concat1"],
+            "input_shapes": [[-1, 1, 3136, 256]],
+            "output_shapes": [[-1, 56, 56, 256]],
+            "original_names": ["node_view_69", "node_upsample_bilinear2d"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [56, 56, 256],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/layer_normalization9": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/format_conversion12"],
+            "output": ["sidewalk_tobias/normalization9"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_layer_norm_8"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization9": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization9"],
+            "output": ["sidewalk_tobias/layer_normalization10", "sidewalk_tobias/ew_add5"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64], [-1, 1, 784, 64]],
+            "original_names": ["node_layer_norm_8"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization10": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/normalization9"],
+            "output": ["sidewalk_tobias/normalization10"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_layer_norm_9", "node_transpose_19"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization10": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization10"],
+            "output": ["sidewalk_tobias/conv18", "sidewalk_tobias/format_conversion14"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64], [-1, 1, 784, 64]],
+            "original_names": ["node_layer_norm_9", "node_transpose_19"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv18": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization10"],
+            "output": ["sidewalk_tobias/mul_and_add5"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_MatMul_188", "node_linear_12", "node_view_19", "node_transpose_18"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 64, 64],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion14": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/normalization10"],
+            "output": ["sidewalk_tobias/conv19"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 28, 28, 64]],
+            "original_names": ["node_view_20"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [28, 28, 64],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/conv19": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/format_conversion14"],
+            "output": ["sidewalk_tobias/format_conversion15"],
+            "input_shapes": [[-1, 28, 28, 64]],
+            "output_shapes": [[-1, 7, 7, 64]],
+            "original_names": ["node_conv2d_6"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [4, 4, 64, 64],
+                "strides": [1, 4, 4, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion15": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv19"],
+            "output": ["sidewalk_tobias/layer_normalization11"],
+            "input_shapes": [[-1, 7, 7, 64]],
+            "output_shapes": [[-1, 1, 49, 64]],
+            "original_names": ["node_view_21", "node_transpose_20"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 49, 64],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/layer_normalization11": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/format_conversion15"],
+            "output": ["sidewalk_tobias/normalization11"],
+            "input_shapes": [[-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 49, 64]],
+            "original_names": ["node_layer_norm_10"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/mul_and_add5": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv18"],
+            "output": ["sidewalk_tobias/matmul5"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_Mul_236"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/normalization11": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization11"],
+            "output": ["sidewalk_tobias/conv20", "sidewalk_tobias/conv21"],
+            "input_shapes": [[-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 49, 64], [-1, 1, 49, 64]],
+            "original_names": ["node_layer_norm_10"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv20": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization11"],
+            "output": ["sidewalk_tobias/mul_and_add6"],
+            "input_shapes": [[-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 49, 64]],
+            "original_names": ["node_MatMul_207", "node_linear_13", "node_view_22", "node_transpose_21", "node_Reshape_231", "node_Transpose_232", "node_Reshape_234"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 64, 64],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv21": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization11"],
+            "output": ["sidewalk_tobias/matmul6"],
+            "input_shapes": [[-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 49, 64]],
+            "original_names": ["node_MatMul_215", "node_linear_14", "node_view_23", "node_transpose_22"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 64, 64],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/mul_and_add6": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv20"],
+            "output": ["sidewalk_tobias/matmul5"],
+            "input_shapes": [[-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 49, 64]],
+            "original_names": ["node_Mul_239", "val_261_attention_transposed"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/matmul5": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/mul_and_add5", "sidewalk_tobias/mul_and_add6"],
+            "output": ["sidewalk_tobias/softmax3"],
+            "input_shapes": [[-1, 1, 784, 64], [-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 784, 98]],
+            "original_names": ["node_MatMul_240"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": true,
+                "kernel_shape": [1, 1, 64, 98],
+                "groups": 2,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/softmax3": {
+            "type": "softmax",
+            "input": ["sidewalk_tobias/matmul5"],
+            "output": ["sidewalk_tobias/matmul6"],
+            "input_shapes": [[-1, 1, 784, 98]],
+            "output_shapes": [[-1, 1, 784, 98]],
+            "original_names": ["node_Softmax_241"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "groups": 2,
+                "logits_axis": 3
+            }
+        },
+        "sidewalk_tobias/matmul6": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/softmax3", "sidewalk_tobias/conv21"],
+            "output": ["sidewalk_tobias/conv22"],
+            "input_shapes": [[-1, 1, 784, 98], [-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_scaled_dot_product_attention_2", "node_transpose_23", "node_view_24"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": false,
+                "kernel_shape": [1, 1, 98, 64],
+                "groups": 2,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv22": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/matmul6"],
+            "output": ["sidewalk_tobias/ew_add5"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_MatMul_248", "node_linear_15"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 64, 64],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add5": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv22", "sidewalk_tobias/normalization9"],
+            "output": ["sidewalk_tobias/layer_normalization12", "sidewalk_tobias/ew_add6"],
+            "input_shapes": [[-1, 1, 784, 64], [-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64], [-1, 1, 784, 64]],
+            "original_names": ["node_add_4"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization12": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add5"],
+            "output": ["sidewalk_tobias/normalization12"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_layer_norm_11"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization12": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization12"],
+            "output": ["sidewalk_tobias/conv23"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_layer_norm_11"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv23": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization12"],
+            "output": ["sidewalk_tobias/format_conversion16"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 256]],
+            "original_names": ["node_MatMul_250", "node_linear_16", "node_transpose_24"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 64, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion16": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv23"],
+            "output": ["sidewalk_tobias/dw3"],
+            "input_shapes": [[-1, 1, 784, 256]],
+            "output_shapes": [[-1, 28, 28, 256]],
+            "original_names": ["node_view_25"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [28, 28, 256],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/dw3": {
+            "type": "dw",
+            "input": ["sidewalk_tobias/format_conversion16"],
+            "output": ["sidewalk_tobias/format_conversion17"],
+            "input_shapes": [[-1, 28, 28, 256]],
+            "output_shapes": [[-1, 28, 28, 256]],
+            "original_names": ["node_conv2d_7"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [3, 3, 256, 1],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "SAME_TENSORFLOW",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion17": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/dw3"],
+            "output": ["sidewalk_tobias/activation3"],
+            "input_shapes": [[-1, 28, 28, 256]],
+            "output_shapes": [[-1, 1, 784, 256]],
+            "original_names": ["node_view_26", "node_transpose_25"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 784, 256],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/activation3": {
+            "type": "activation",
+            "input": ["sidewalk_tobias/format_conversion17"],
+            "output": ["sidewalk_tobias/conv24"],
+            "input_shapes": [[-1, 1, 784, 256]],
+            "output_shapes": [[-1, 1, 784, 256]],
+            "original_names": ["node_Div_263", "node_Erf_264", "node_Add_266", "node_Mul_268", "node_gelu_2"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "gelu"
+            }
+        },
+        "sidewalk_tobias/conv24": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/activation3"],
+            "output": ["sidewalk_tobias/ew_add6"],
+            "input_shapes": [[-1, 1, 784, 256]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_MatMul_270", "node_linear_17"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 64],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add6": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv24", "sidewalk_tobias/ew_add5"],
+            "output": ["sidewalk_tobias/layer_normalization13", "sidewalk_tobias/ew_add7"],
+            "input_shapes": [[-1, 1, 784, 64], [-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64], [-1, 1, 784, 64]],
+            "original_names": ["node_add_5"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization13": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add6"],
+            "output": ["sidewalk_tobias/normalization13"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_layer_norm_12", "node_transpose_27"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization13": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization13"],
+            "output": ["sidewalk_tobias/conv25", "sidewalk_tobias/format_conversion18"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64], [-1, 1, 784, 64]],
+            "original_names": ["node_layer_norm_12", "node_transpose_27"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv25": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization13"],
+            "output": ["sidewalk_tobias/mul_and_add7"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_MatMul_272", "node_linear_18", "node_view_27", "node_transpose_26"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 64, 64],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion18": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/normalization13"],
+            "output": ["sidewalk_tobias/conv26"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 28, 28, 64]],
+            "original_names": ["node_view_28"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [28, 28, 64],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/conv26": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/format_conversion18"],
+            "output": ["sidewalk_tobias/format_conversion19"],
+            "input_shapes": [[-1, 28, 28, 64]],
+            "output_shapes": [[-1, 7, 7, 64]],
+            "original_names": ["node_conv2d_8"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [4, 4, 64, 64],
+                "strides": [1, 4, 4, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion19": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv26"],
+            "output": ["sidewalk_tobias/layer_normalization14"],
+            "input_shapes": [[-1, 7, 7, 64]],
+            "output_shapes": [[-1, 1, 49, 64]],
+            "original_names": ["node_view_29", "node_transpose_28"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 49, 64],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/layer_normalization14": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/format_conversion19"],
+            "output": ["sidewalk_tobias/normalization14"],
+            "input_shapes": [[-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 49, 64]],
+            "original_names": ["node_layer_norm_13"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/mul_and_add7": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv25"],
+            "output": ["sidewalk_tobias/matmul7"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_Mul_320"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/normalization14": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization14"],
+            "output": ["sidewalk_tobias/conv27", "sidewalk_tobias/conv28"],
+            "input_shapes": [[-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 49, 64], [-1, 1, 49, 64]],
+            "original_names": ["node_layer_norm_13"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv27": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization14"],
+            "output": ["sidewalk_tobias/mul_and_add8"],
+            "input_shapes": [[-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 49, 64]],
+            "original_names": ["node_MatMul_291", "node_linear_19", "node_view_30", "node_transpose_29", "node_Reshape_315", "node_Transpose_316", "node_Reshape_318"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 64, 64],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv28": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization14"],
+            "output": ["sidewalk_tobias/matmul8"],
+            "input_shapes": [[-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 49, 64]],
+            "original_names": ["node_MatMul_299", "node_linear_20", "node_view_31", "node_transpose_30"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 64, 64],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/mul_and_add8": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv27"],
+            "output": ["sidewalk_tobias/matmul7"],
+            "input_shapes": [[-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 49, 64]],
+            "original_names": ["node_Mul_323", "val_351_attention_transposed"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/matmul7": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/mul_and_add7", "sidewalk_tobias/mul_and_add8"],
+            "output": ["sidewalk_tobias/softmax4"],
+            "input_shapes": [[-1, 1, 784, 64], [-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 784, 98]],
+            "original_names": ["node_MatMul_324"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": true,
+                "kernel_shape": [1, 1, 64, 98],
+                "groups": 2,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/softmax4": {
+            "type": "softmax",
+            "input": ["sidewalk_tobias/matmul7"],
+            "output": ["sidewalk_tobias/matmul8"],
+            "input_shapes": [[-1, 1, 784, 98]],
+            "output_shapes": [[-1, 1, 784, 98]],
+            "original_names": ["node_Softmax_325"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "groups": 2,
+                "logits_axis": 3
+            }
+        },
+        "sidewalk_tobias/matmul8": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/softmax4", "sidewalk_tobias/conv28"],
+            "output": ["sidewalk_tobias/conv29"],
+            "input_shapes": [[-1, 1, 784, 98], [-1, 1, 49, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_scaled_dot_product_attention_3", "node_transpose_31", "node_view_32"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": false,
+                "kernel_shape": [1, 1, 98, 64],
+                "groups": 2,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv29": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/matmul8"],
+            "output": ["sidewalk_tobias/ew_add7"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_MatMul_332", "node_linear_21"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 64, 64],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add7": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv29", "sidewalk_tobias/ew_add6"],
+            "output": ["sidewalk_tobias/layer_normalization15", "sidewalk_tobias/ew_add8"],
+            "input_shapes": [[-1, 1, 784, 64], [-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64], [-1, 1, 784, 64]],
+            "original_names": ["node_add_6"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization15": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add7"],
+            "output": ["sidewalk_tobias/normalization15"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_layer_norm_14"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization15": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization15"],
+            "output": ["sidewalk_tobias/conv30"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_layer_norm_14"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv30": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization15"],
+            "output": ["sidewalk_tobias/format_conversion20"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 256]],
+            "original_names": ["node_MatMul_334", "node_linear_22", "node_transpose_32"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 64, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion20": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv30"],
+            "output": ["sidewalk_tobias/dw4"],
+            "input_shapes": [[-1, 1, 784, 256]],
+            "output_shapes": [[-1, 28, 28, 256]],
+            "original_names": ["node_view_33"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [28, 28, 256],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/dw4": {
+            "type": "dw",
+            "input": ["sidewalk_tobias/format_conversion20"],
+            "output": ["sidewalk_tobias/format_conversion21"],
+            "input_shapes": [[-1, 28, 28, 256]],
+            "output_shapes": [[-1, 28, 28, 256]],
+            "original_names": ["node_conv2d_9"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [3, 3, 256, 1],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "SAME_TENSORFLOW",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion21": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/dw4"],
+            "output": ["sidewalk_tobias/activation4"],
+            "input_shapes": [[-1, 28, 28, 256]],
+            "output_shapes": [[-1, 1, 784, 256]],
+            "original_names": ["node_view_34", "node_transpose_33"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 784, 256],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/activation4": {
+            "type": "activation",
+            "input": ["sidewalk_tobias/format_conversion21"],
+            "output": ["sidewalk_tobias/conv31"],
+            "input_shapes": [[-1, 1, 784, 256]],
+            "output_shapes": [[-1, 1, 784, 256]],
+            "original_names": ["node_Div_347", "node_Erf_348", "node_Add_350", "node_Mul_352", "node_gelu_3"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "gelu"
+            }
+        },
+        "sidewalk_tobias/conv31": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/activation4"],
+            "output": ["sidewalk_tobias/ew_add8"],
+            "input_shapes": [[-1, 1, 784, 256]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_MatMul_354", "node_linear_23"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 64],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add8": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv31", "sidewalk_tobias/ew_add7"],
+            "output": ["sidewalk_tobias/layer_normalization16"],
+            "input_shapes": [[-1, 1, 784, 64], [-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_add_7"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization16": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add8"],
+            "output": ["sidewalk_tobias/normalization16"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_layer_norm_15"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization16": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization16"],
+            "output": ["sidewalk_tobias/format_conversion22"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_layer_norm_15"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion22": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/normalization16"],
+            "output": ["sidewalk_tobias/conv32", "sidewalk_tobias/format_conversion23"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 28, 28, 64], [-1, 28, 28, 64]],
+            "original_names": ["node_view_35", "node_permute_1"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [28, 28, 64],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/conv32": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/format_conversion22"],
+            "output": ["sidewalk_tobias/format_conversion24"],
+            "input_shapes": [[-1, 28, 28, 64]],
+            "output_shapes": [[-1, 14, 14, 160]],
+            "original_names": ["node_conv2d_10"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [3, 3, 64, 160],
+                "strides": [1, 2, 2, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "SAME",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion23": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/format_conversion22"],
+            "output": ["sidewalk_tobias/conv33"],
+            "input_shapes": [[-1, 28, 28, 64]],
+            "output_shapes": [[-1, 1, 784, 64]],
+            "original_names": ["node_view_70", "node_transpose_66"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 784, 64],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/conv33": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/format_conversion23"],
+            "output": ["sidewalk_tobias/format_conversion25"],
+            "input_shapes": [[-1, 1, 784, 64]],
+            "output_shapes": [[-1, 1, 784, 256]],
+            "original_names": ["node_MatMul_720", "node_linear_49", "node_transpose_67"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 64, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion24": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv32"],
+            "output": ["sidewalk_tobias/layer_normalization17"],
+            "input_shapes": [[-1, 14, 14, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_view_36", "node_transpose_34"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 196, 160],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/format_conversion25": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv33"],
+            "output": ["sidewalk_tobias/resize1"],
+            "input_shapes": [[-1, 1, 784, 256]],
+            "output_shapes": [[-1, 28, 28, 256]],
+            "original_names": ["node_view_71"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [28, 28, 256],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/layer_normalization17": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/format_conversion24"],
+            "output": ["sidewalk_tobias/normalization17"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_layer_norm_16"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization17": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization17"],
+            "output": ["sidewalk_tobias/layer_normalization18", "sidewalk_tobias/ew_add9"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160], [-1, 1, 196, 160]],
+            "original_names": ["node_layer_norm_16"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization18": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/normalization17"],
+            "output": ["sidewalk_tobias/normalization18"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_layer_norm_17", "node_transpose_36"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization18": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization18"],
+            "output": ["sidewalk_tobias/conv34", "sidewalk_tobias/format_conversion26"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160], [-1, 1, 196, 160]],
+            "original_names": ["node_layer_norm_17", "node_transpose_36"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv34": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization18"],
+            "output": ["sidewalk_tobias/mul_and_add10"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_MatMul_367", "node_linear_24", "node_view_37", "node_transpose_35"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 160, 160],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion26": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/normalization18"],
+            "output": ["sidewalk_tobias/conv35"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 14, 14, 160]],
+            "original_names": ["node_view_38"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [14, 14, 160],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/conv35": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/format_conversion26"],
+            "output": ["sidewalk_tobias/format_conversion27"],
+            "input_shapes": [[-1, 14, 14, 160]],
+            "output_shapes": [[-1, 7, 7, 160]],
+            "original_names": ["node_conv2d_11"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [2, 2, 160, 160],
+                "strides": [1, 2, 2, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion27": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv35"],
+            "output": ["sidewalk_tobias/layer_normalization19"],
+            "input_shapes": [[-1, 7, 7, 160]],
+            "output_shapes": [[-1, 1, 49, 160]],
+            "original_names": ["node_view_39", "node_transpose_37"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 49, 160],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/layer_normalization19": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/format_conversion27"],
+            "output": ["sidewalk_tobias/normalization19"],
+            "input_shapes": [[-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 49, 160]],
+            "original_names": ["node_layer_norm_18"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/mul_and_add10": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv34"],
+            "output": ["sidewalk_tobias/matmul9"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_Mul_415"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/normalization19": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization19"],
+            "output": ["sidewalk_tobias/conv36", "sidewalk_tobias/conv37"],
+            "input_shapes": [[-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 49, 160], [-1, 1, 49, 160]],
+            "original_names": ["node_layer_norm_18"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv36": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization19"],
+            "output": ["sidewalk_tobias/mul_and_add9"],
+            "input_shapes": [[-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 49, 160]],
+            "original_names": ["node_MatMul_386", "node_linear_25", "node_view_40", "node_transpose_38", "node_Reshape_410", "node_Transpose_411", "node_Reshape_413"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 160, 160],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv37": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization19"],
+            "output": ["sidewalk_tobias/matmul10"],
+            "input_shapes": [[-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 49, 160]],
+            "original_names": ["node_MatMul_394", "node_linear_26", "node_view_41", "node_transpose_39"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 160, 160],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/mul_and_add9": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv36"],
+            "output": ["sidewalk_tobias/matmul9"],
+            "input_shapes": [[-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 49, 160]],
+            "original_names": ["node_Mul_418", "val_456_attention_transposed"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/matmul9": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/mul_and_add10", "sidewalk_tobias/mul_and_add9"],
+            "output": ["sidewalk_tobias/softmax5"],
+            "input_shapes": [[-1, 1, 196, 160], [-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 196, 245]],
+            "original_names": ["node_MatMul_419"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": true,
+                "kernel_shape": [1, 1, 160, 245],
+                "groups": 5,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/resize1": {
+            "type": "resize",
+            "input": ["sidewalk_tobias/format_conversion25"],
+            "output": ["sidewalk_tobias/concat1"],
+            "input_shapes": [[-1, 28, 28, 256]],
+            "output_shapes": [[-1, 56, 56, 256]],
+            "original_names": ["node_upsample_bilinear2d_1"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "resize_h_ratio_list": [2.0],
+                "resize_w_ratio_list": [2.0],
+                "resize_f_ratio_list": [1.0],
+                "method": "bilinear",
+                "resize_bilinear_pixels_mode": "half_pixels"
+            }
+        },
+        "sidewalk_tobias/softmax5": {
+            "type": "softmax",
+            "input": ["sidewalk_tobias/matmul9"],
+            "output": ["sidewalk_tobias/matmul10"],
+            "input_shapes": [[-1, 1, 196, 245]],
+            "output_shapes": [[-1, 1, 196, 245]],
+            "original_names": ["node_Softmax_420"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "groups": 5,
+                "logits_axis": 3
+            }
+        },
+        "sidewalk_tobias/matmul10": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/softmax5", "sidewalk_tobias/conv37"],
+            "output": ["sidewalk_tobias/conv38"],
+            "input_shapes": [[-1, 1, 196, 245], [-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_scaled_dot_product_attention_4", "node_transpose_40", "node_view_42"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": false,
+                "kernel_shape": [1, 1, 245, 160],
+                "groups": 5,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv38": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/matmul10"],
+            "output": ["sidewalk_tobias/ew_add9"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_MatMul_427", "node_linear_27"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 160, 160],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add9": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv38", "sidewalk_tobias/normalization17"],
+            "output": ["sidewalk_tobias/layer_normalization20", "sidewalk_tobias/ew_add10"],
+            "input_shapes": [[-1, 1, 196, 160], [-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160], [-1, 1, 196, 160]],
+            "original_names": ["node_add_8"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization20": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add9"],
+            "output": ["sidewalk_tobias/normalization20"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_layer_norm_19"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization20": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization20"],
+            "output": ["sidewalk_tobias/conv39"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_layer_norm_19"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv39": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization20"],
+            "output": ["sidewalk_tobias/format_conversion28"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 640]],
+            "original_names": ["node_MatMul_429", "node_linear_28", "node_transpose_41"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 160, 640],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion28": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv39"],
+            "output": ["sidewalk_tobias/dw5"],
+            "input_shapes": [[-1, 1, 196, 640]],
+            "output_shapes": [[-1, 14, 14, 640]],
+            "original_names": ["node_view_43"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [14, 14, 640],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/dw5": {
+            "type": "dw",
+            "input": ["sidewalk_tobias/format_conversion28"],
+            "output": ["sidewalk_tobias/format_conversion29"],
+            "input_shapes": [[-1, 14, 14, 640]],
+            "output_shapes": [[-1, 14, 14, 640]],
+            "original_names": ["node_conv2d_12"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [3, 3, 640, 1],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "SAME_TENSORFLOW",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion29": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/dw5"],
+            "output": ["sidewalk_tobias/activation5"],
+            "input_shapes": [[-1, 14, 14, 640]],
+            "output_shapes": [[-1, 1, 196, 640]],
+            "original_names": ["node_view_44", "node_transpose_42"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 196, 640],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/activation5": {
+            "type": "activation",
+            "input": ["sidewalk_tobias/format_conversion29"],
+            "output": ["sidewalk_tobias/conv40"],
+            "input_shapes": [[-1, 1, 196, 640]],
+            "output_shapes": [[-1, 1, 196, 640]],
+            "original_names": ["node_Div_442", "node_Erf_443", "node_Add_445", "node_Mul_447", "node_gelu_4"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "gelu"
+            }
+        },
+        "sidewalk_tobias/conv40": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/activation5"],
+            "output": ["sidewalk_tobias/ew_add10"],
+            "input_shapes": [[-1, 1, 196, 640]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_MatMul_449", "node_linear_29"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 640, 160],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add10": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv40", "sidewalk_tobias/ew_add9"],
+            "output": ["sidewalk_tobias/layer_normalization21", "sidewalk_tobias/ew_add11"],
+            "input_shapes": [[-1, 1, 196, 160], [-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160], [-1, 1, 196, 160]],
+            "original_names": ["node_add_9"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization21": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add10"],
+            "output": ["sidewalk_tobias/normalization21"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_layer_norm_20", "node_transpose_44"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization21": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization21"],
+            "output": ["sidewalk_tobias/conv41", "sidewalk_tobias/format_conversion30"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160], [-1, 1, 196, 160]],
+            "original_names": ["node_layer_norm_20", "node_transpose_44"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv41": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization21"],
+            "output": ["sidewalk_tobias/mul_and_add11"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_MatMul_451", "node_linear_30", "node_view_45", "node_transpose_43"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 160, 160],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion30": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/normalization21"],
+            "output": ["sidewalk_tobias/conv42"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 14, 14, 160]],
+            "original_names": ["node_view_46"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [14, 14, 160],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/conv42": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/format_conversion30"],
+            "output": ["sidewalk_tobias/format_conversion31"],
+            "input_shapes": [[-1, 14, 14, 160]],
+            "output_shapes": [[-1, 7, 7, 160]],
+            "original_names": ["node_conv2d_13"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [2, 2, 160, 160],
+                "strides": [1, 2, 2, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion31": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv42"],
+            "output": ["sidewalk_tobias/layer_normalization22"],
+            "input_shapes": [[-1, 7, 7, 160]],
+            "output_shapes": [[-1, 1, 49, 160]],
+            "original_names": ["node_view_47", "node_transpose_45"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 49, 160],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/layer_normalization22": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/format_conversion31"],
+            "output": ["sidewalk_tobias/normalization22"],
+            "input_shapes": [[-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 49, 160]],
+            "original_names": ["node_layer_norm_21"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/mul_and_add11": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv41"],
+            "output": ["sidewalk_tobias/matmul11"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_Mul_499"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/normalization22": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization22"],
+            "output": ["sidewalk_tobias/conv43", "sidewalk_tobias/conv44"],
+            "input_shapes": [[-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 49, 160], [-1, 1, 49, 160]],
+            "original_names": ["node_layer_norm_21"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv43": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization22"],
+            "output": ["sidewalk_tobias/mul_and_add12"],
+            "input_shapes": [[-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 49, 160]],
+            "original_names": ["node_MatMul_470", "node_linear_31", "node_view_48", "node_transpose_46", "node_Reshape_494", "node_Transpose_495", "node_Reshape_497"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 160, 160],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv44": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization22"],
+            "output": ["sidewalk_tobias/matmul12"],
+            "input_shapes": [[-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 49, 160]],
+            "original_names": ["node_MatMul_478", "node_linear_32", "node_view_49", "node_transpose_47"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 160, 160],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/mul_and_add12": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv43"],
+            "output": ["sidewalk_tobias/matmul11"],
+            "input_shapes": [[-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 49, 160]],
+            "original_names": ["node_Mul_502", "val_546_attention_transposed"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/matmul11": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/mul_and_add11", "sidewalk_tobias/mul_and_add12"],
+            "output": ["sidewalk_tobias/softmax6"],
+            "input_shapes": [[-1, 1, 196, 160], [-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 196, 245]],
+            "original_names": ["node_MatMul_503"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": true,
+                "kernel_shape": [1, 1, 160, 245],
+                "groups": 5,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/softmax6": {
+            "type": "softmax",
+            "input": ["sidewalk_tobias/matmul11"],
+            "output": ["sidewalk_tobias/matmul12"],
+            "input_shapes": [[-1, 1, 196, 245]],
+            "output_shapes": [[-1, 1, 196, 245]],
+            "original_names": ["node_Softmax_504"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "groups": 5,
+                "logits_axis": 3
+            }
+        },
+        "sidewalk_tobias/matmul12": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/softmax6", "sidewalk_tobias/conv44"],
+            "output": ["sidewalk_tobias/conv45"],
+            "input_shapes": [[-1, 1, 196, 245], [-1, 1, 49, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_scaled_dot_product_attention_5", "node_transpose_48", "node_view_50"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": false,
+                "kernel_shape": [1, 1, 245, 160],
+                "groups": 5,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv45": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/matmul12"],
+            "output": ["sidewalk_tobias/ew_add11"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_MatMul_511", "node_linear_33"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 160, 160],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add11": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv45", "sidewalk_tobias/ew_add10"],
+            "output": ["sidewalk_tobias/layer_normalization23", "sidewalk_tobias/ew_add12"],
+            "input_shapes": [[-1, 1, 196, 160], [-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160], [-1, 1, 196, 160]],
+            "original_names": ["node_add_10"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization23": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add11"],
+            "output": ["sidewalk_tobias/normalization23"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_layer_norm_22"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization23": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization23"],
+            "output": ["sidewalk_tobias/conv46"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_layer_norm_22"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv46": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization23"],
+            "output": ["sidewalk_tobias/format_conversion32"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 640]],
+            "original_names": ["node_MatMul_513", "node_linear_34", "node_transpose_49"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 160, 640],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion32": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv46"],
+            "output": ["sidewalk_tobias/dw6"],
+            "input_shapes": [[-1, 1, 196, 640]],
+            "output_shapes": [[-1, 14, 14, 640]],
+            "original_names": ["node_view_51"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [14, 14, 640],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/dw6": {
+            "type": "dw",
+            "input": ["sidewalk_tobias/format_conversion32"],
+            "output": ["sidewalk_tobias/format_conversion33"],
+            "input_shapes": [[-1, 14, 14, 640]],
+            "output_shapes": [[-1, 14, 14, 640]],
+            "original_names": ["node_conv2d_14"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [3, 3, 640, 1],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "SAME_TENSORFLOW",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion33": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/dw6"],
+            "output": ["sidewalk_tobias/activation6"],
+            "input_shapes": [[-1, 14, 14, 640]],
+            "output_shapes": [[-1, 1, 196, 640]],
+            "original_names": ["node_view_52", "node_transpose_50"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 196, 640],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/activation6": {
+            "type": "activation",
+            "input": ["sidewalk_tobias/format_conversion33"],
+            "output": ["sidewalk_tobias/conv47"],
+            "input_shapes": [[-1, 1, 196, 640]],
+            "output_shapes": [[-1, 1, 196, 640]],
+            "original_names": ["node_Div_526", "node_Erf_527", "node_Add_529", "node_Mul_531", "node_gelu_5"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "gelu"
+            }
+        },
+        "sidewalk_tobias/conv47": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/activation6"],
+            "output": ["sidewalk_tobias/ew_add12"],
+            "input_shapes": [[-1, 1, 196, 640]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_MatMul_533", "node_linear_35"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 640, 160],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add12": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv47", "sidewalk_tobias/ew_add11"],
+            "output": ["sidewalk_tobias/layer_normalization24"],
+            "input_shapes": [[-1, 1, 196, 160], [-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_add_11"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization24": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add12"],
+            "output": ["sidewalk_tobias/normalization24"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_layer_norm_23"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization24": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization24"],
+            "output": ["sidewalk_tobias/format_conversion34"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_layer_norm_23"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion34": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/normalization24"],
+            "output": ["sidewalk_tobias/conv48", "sidewalk_tobias/format_conversion35"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 14, 14, 160], [-1, 14, 14, 160]],
+            "original_names": ["node_view_53", "node_permute_2"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [14, 14, 160],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/conv48": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/format_conversion34"],
+            "output": ["sidewalk_tobias/format_conversion36"],
+            "input_shapes": [[-1, 14, 14, 160]],
+            "output_shapes": [[-1, 7, 7, 256]],
+            "original_names": ["node_conv2d_15"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [3, 3, 160, 256],
+                "strides": [1, 2, 2, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "SAME",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion35": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/format_conversion34"],
+            "output": ["sidewalk_tobias/conv49"],
+            "input_shapes": [[-1, 14, 14, 160]],
+            "output_shapes": [[-1, 1, 196, 160]],
+            "original_names": ["node_view_72", "node_transpose_68"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 196, 160],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/conv49": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/format_conversion35"],
+            "output": ["sidewalk_tobias/format_conversion37"],
+            "input_shapes": [[-1, 1, 196, 160]],
+            "output_shapes": [[-1, 1, 196, 256]],
+            "original_names": ["node_MatMul_736", "node_linear_50", "node_transpose_69"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 160, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion36": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv48"],
+            "output": ["sidewalk_tobias/layer_normalization25"],
+            "input_shapes": [[-1, 7, 7, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_view_54", "node_transpose_51"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 49, 256],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/format_conversion37": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv49"],
+            "output": ["sidewalk_tobias/resize2"],
+            "input_shapes": [[-1, 1, 196, 256]],
+            "output_shapes": [[-1, 14, 14, 256]],
+            "original_names": ["node_view_73"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [14, 14, 256],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/layer_normalization25": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/format_conversion36"],
+            "output": ["sidewalk_tobias/normalization25"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_layer_norm_24"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization25": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization25"],
+            "output": ["sidewalk_tobias/layer_normalization26", "sidewalk_tobias/ew_add13"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256], [-1, 1, 49, 256]],
+            "original_names": ["node_layer_norm_24"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization26": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/normalization25"],
+            "output": ["sidewalk_tobias/normalization26"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_layer_norm_25"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization26": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization26"],
+            "output": ["sidewalk_tobias/conv50", "sidewalk_tobias/conv51", "sidewalk_tobias/conv52"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256], [-1, 1, 49, 256], [-1, 1, 49, 256]],
+            "original_names": ["node_layer_norm_25"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv50": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization26"],
+            "output": ["sidewalk_tobias/mul_and_add13"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_MatMul_546", "node_linear_36", "node_view_55", "node_transpose_52"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv51": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization26"],
+            "output": ["sidewalk_tobias/mul_and_add14"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_MatMul_554", "node_linear_37", "node_view_56", "node_transpose_53", "node_Reshape_578", "node_Transpose_579", "node_Reshape_581"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv52": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization26"],
+            "output": ["sidewalk_tobias/matmul14"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_MatMul_562", "node_linear_38", "node_view_57", "node_transpose_54"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/mul_and_add13": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv50"],
+            "output": ["sidewalk_tobias/matmul13"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_Mul_583"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/mul_and_add14": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv51"],
+            "output": ["sidewalk_tobias/matmul13"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_Mul_586", "val_638_attention_transposed"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/matmul13": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/mul_and_add13", "sidewalk_tobias/mul_and_add14"],
+            "output": ["sidewalk_tobias/softmax7"],
+            "input_shapes": [[-1, 1, 49, 256], [-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 392]],
+            "original_names": ["node_MatMul_587"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": true,
+                "kernel_shape": [1, 1, 256, 392],
+                "groups": 8,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/resize2": {
+            "type": "resize",
+            "input": ["sidewalk_tobias/format_conversion37"],
+            "output": ["sidewalk_tobias/concat1"],
+            "input_shapes": [[-1, 14, 14, 256]],
+            "output_shapes": [[-1, 56, 56, 256]],
+            "original_names": ["node_upsample_bilinear2d_2"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "resize_h_ratio_list": [4.0],
+                "resize_w_ratio_list": [4.0],
+                "resize_f_ratio_list": [1.0],
+                "method": "bilinear",
+                "resize_bilinear_pixels_mode": "half_pixels"
+            }
+        },
+        "sidewalk_tobias/softmax7": {
+            "type": "softmax",
+            "input": ["sidewalk_tobias/matmul13"],
+            "output": ["sidewalk_tobias/matmul14"],
+            "input_shapes": [[-1, 1, 49, 392]],
+            "output_shapes": [[-1, 1, 49, 392]],
+            "original_names": ["node_Softmax_588"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "groups": 8,
+                "logits_axis": 3
+            }
+        },
+        "sidewalk_tobias/matmul14": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/softmax7", "sidewalk_tobias/conv52"],
+            "output": ["sidewalk_tobias/conv53"],
+            "input_shapes": [[-1, 1, 49, 392], [-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_scaled_dot_product_attention_6", "node_transpose_55", "node_view_58"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": false,
+                "kernel_shape": [1, 1, 392, 256],
+                "groups": 8,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv53": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/matmul14"],
+            "output": ["sidewalk_tobias/ew_add13"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_MatMul_595", "node_linear_39"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add13": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv53", "sidewalk_tobias/normalization25"],
+            "output": ["sidewalk_tobias/layer_normalization27", "sidewalk_tobias/ew_add14"],
+            "input_shapes": [[-1, 1, 49, 256], [-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256], [-1, 1, 49, 256]],
+            "original_names": ["node_add_12"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization27": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add13"],
+            "output": ["sidewalk_tobias/normalization27"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_layer_norm_26"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization27": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization27"],
+            "output": ["sidewalk_tobias/conv54"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_layer_norm_26"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv54": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization27"],
+            "output": ["sidewalk_tobias/format_conversion38"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 1024]],
+            "original_names": ["node_MatMul_597", "node_linear_40", "node_transpose_56"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 1024],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion38": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv54"],
+            "output": ["sidewalk_tobias/dw7"],
+            "input_shapes": [[-1, 1, 49, 1024]],
+            "output_shapes": [[-1, 7, 7, 1024]],
+            "original_names": ["node_view_59"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [7, 7, 1024],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/dw7": {
+            "type": "dw",
+            "input": ["sidewalk_tobias/format_conversion38"],
+            "output": ["sidewalk_tobias/format_conversion39"],
+            "input_shapes": [[-1, 7, 7, 1024]],
+            "output_shapes": [[-1, 7, 7, 1024]],
+            "original_names": ["node_conv2d_16"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [3, 3, 1024, 1],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "SAME_TENSORFLOW",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion39": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/dw7"],
+            "output": ["sidewalk_tobias/activation7"],
+            "input_shapes": [[-1, 7, 7, 1024]],
+            "output_shapes": [[-1, 1, 49, 1024]],
+            "original_names": ["node_view_60", "node_transpose_57"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 49, 1024],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/activation7": {
+            "type": "activation",
+            "input": ["sidewalk_tobias/format_conversion39"],
+            "output": ["sidewalk_tobias/conv55"],
+            "input_shapes": [[-1, 1, 49, 1024]],
+            "output_shapes": [[-1, 1, 49, 1024]],
+            "original_names": ["node_Div_610", "node_Erf_611", "node_Add_613", "node_Mul_615", "node_gelu_6"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "gelu"
+            }
+        },
+        "sidewalk_tobias/conv55": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/activation7"],
+            "output": ["sidewalk_tobias/ew_add14"],
+            "input_shapes": [[-1, 1, 49, 1024]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_MatMul_617", "node_linear_41"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 1024, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add14": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv55", "sidewalk_tobias/ew_add13"],
+            "output": ["sidewalk_tobias/layer_normalization28", "sidewalk_tobias/ew_add15"],
+            "input_shapes": [[-1, 1, 49, 256], [-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256], [-1, 1, 49, 256]],
+            "original_names": ["node_add_13"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization28": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add14"],
+            "output": ["sidewalk_tobias/normalization28"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_layer_norm_27"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization28": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization28"],
+            "output": ["sidewalk_tobias/conv56", "sidewalk_tobias/conv57", "sidewalk_tobias/conv58"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256], [-1, 1, 49, 256], [-1, 1, 49, 256]],
+            "original_names": ["node_layer_norm_27"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv56": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization28"],
+            "output": ["sidewalk_tobias/mul_and_add15"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_MatMul_619", "node_linear_42", "node_view_61", "node_transpose_58"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv57": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization28"],
+            "output": ["sidewalk_tobias/mul_and_add16"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_MatMul_627", "node_linear_43", "node_view_62", "node_transpose_59", "node_Reshape_651", "node_Transpose_652", "node_Reshape_654"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv58": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization28"],
+            "output": ["sidewalk_tobias/matmul16"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_MatMul_635", "node_linear_44", "node_view_63", "node_transpose_60"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/mul_and_add15": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv56"],
+            "output": ["sidewalk_tobias/matmul15"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_Mul_656"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/mul_and_add16": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/conv57"],
+            "output": ["sidewalk_tobias/matmul15"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_Mul_659", "val_715_attention_transposed"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/matmul15": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/mul_and_add15", "sidewalk_tobias/mul_and_add16"],
+            "output": ["sidewalk_tobias/softmax8"],
+            "input_shapes": [[-1, 1, 49, 256], [-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 392]],
+            "original_names": ["node_MatMul_660"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": true,
+                "kernel_shape": [1, 1, 256, 392],
+                "groups": 8,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/softmax8": {
+            "type": "softmax",
+            "input": ["sidewalk_tobias/matmul15"],
+            "output": ["sidewalk_tobias/matmul16"],
+            "input_shapes": [[-1, 1, 49, 392]],
+            "output_shapes": [[-1, 1, 49, 392]],
+            "original_names": ["node_Softmax_661"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "groups": 8,
+                "logits_axis": 3
+            }
+        },
+        "sidewalk_tobias/matmul16": {
+            "type": "matmul",
+            "input": ["sidewalk_tobias/softmax8", "sidewalk_tobias/conv58"],
+            "output": ["sidewalk_tobias/conv59"],
+            "input_shapes": [[-1, 1, 49, 392], [-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_scaled_dot_product_attention_7", "node_transpose_61", "node_view_64"],
+            "compilation_params": {
+                "mixed_mem": "disabled"
+            },
+            "quantization_params": {},
+            "params": {
+                "dynamic_weights": true,
+                "transpose_matmul_input": false,
+                "kernel_shape": [1, 1, 392, 256],
+                "groups": 8,
+                "input_windows": [1, 1, 1],
+                "zp_correction_type": "zp_comp_none",
+                "zp_comp_rank": 0,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv59": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/matmul16"],
+            "output": ["sidewalk_tobias/ew_add15"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_MatMul_668", "node_linear_45"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add15": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv59", "sidewalk_tobias/ew_add14"],
+            "output": ["sidewalk_tobias/layer_normalization29", "sidewalk_tobias/ew_add16"],
+            "input_shapes": [[-1, 1, 49, 256], [-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256], [-1, 1, 49, 256]],
+            "original_names": ["node_add_14"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization29": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add15"],
+            "output": ["sidewalk_tobias/normalization29"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_layer_norm_28"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization29": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization29"],
+            "output": ["sidewalk_tobias/conv60"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_layer_norm_28"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv60": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization29"],
+            "output": ["sidewalk_tobias/format_conversion40"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 1024]],
+            "original_names": ["node_MatMul_670", "node_linear_46", "node_transpose_62"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 1024],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion40": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv60"],
+            "output": ["sidewalk_tobias/dw8"],
+            "input_shapes": [[-1, 1, 49, 1024]],
+            "output_shapes": [[-1, 7, 7, 1024]],
+            "original_names": ["node_view_65"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [7, 7, 1024],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/dw8": {
+            "type": "dw",
+            "input": ["sidewalk_tobias/format_conversion40"],
+            "output": ["sidewalk_tobias/format_conversion41"],
+            "input_shapes": [[-1, 7, 7, 1024]],
+            "output_shapes": [[-1, 7, 7, 1024]],
+            "original_names": ["node_conv2d_17"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [3, 3, 1024, 1],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "SAME_TENSORFLOW",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion41": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/dw8"],
+            "output": ["sidewalk_tobias/activation8"],
+            "input_shapes": [[-1, 7, 7, 1024]],
+            "output_shapes": [[-1, 1, 49, 1024]],
+            "original_names": ["node_view_66", "node_transpose_63"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [1, 49, 1024],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/activation8": {
+            "type": "activation",
+            "input": ["sidewalk_tobias/format_conversion41"],
+            "output": ["sidewalk_tobias/conv61"],
+            "input_shapes": [[-1, 1, 49, 1024]],
+            "output_shapes": [[-1, 1, 49, 1024]],
+            "original_names": ["node_Div_683", "node_Erf_684", "node_Add_686", "node_Mul_688", "node_gelu_7"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "gelu"
+            }
+        },
+        "sidewalk_tobias/conv61": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/activation8"],
+            "output": ["sidewalk_tobias/ew_add16"],
+            "input_shapes": [[-1, 1, 49, 1024]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_MatMul_690", "node_linear_47"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 1024, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/ew_add16": {
+            "type": "ew_add",
+            "input": ["sidewalk_tobias/conv61", "sidewalk_tobias/ew_add15"],
+            "output": ["sidewalk_tobias/layer_normalization30"],
+            "input_shapes": [[-1, 1, 49, 256], [-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_add_15"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/layer_normalization30": {
+            "type": "layer_normalization",
+            "input": ["sidewalk_tobias/ew_add16"],
+            "output": ["sidewalk_tobias/normalization30"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_layer_norm_29", "node_view_67", "node_permute_3", "node_view_74", "node_transpose_70"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "reduce_axes": [3],
+                "rms_norm": false,
+                "groups": 1
+            }
+        },
+        "sidewalk_tobias/normalization30": {
+            "type": "normalization",
+            "input": ["sidewalk_tobias/layer_normalization30"],
+            "output": ["sidewalk_tobias/conv62"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_layer_norm_29", "node_view_67", "node_permute_3", "node_view_74", "node_transpose_70"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/conv62": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/normalization30"],
+            "output": ["sidewalk_tobias/format_conversion42"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 1, 49, 256]],
+            "original_names": ["node_MatMul_752", "node_linear_51", "node_transpose_71"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/format_conversion42": {
+            "type": "format_conversion",
+            "input": ["sidewalk_tobias/conv62"],
+            "output": ["sidewalk_tobias/resize3"],
+            "input_shapes": [[-1, 1, 49, 256]],
+            "output_shapes": [[-1, 7, 7, 256]],
+            "original_names": ["node_view_75"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "conversion_type": "spatial_reshape",
+                "groups": 1,
+                "spatial_reshape_sizes": [7, 7, 256],
+                "input_windows": [1, 1, 1],
+                "output_windows": [1, 1, 1]
+            }
+        },
+        "sidewalk_tobias/resize3": {
+            "type": "resize",
+            "input": ["sidewalk_tobias/format_conversion42"],
+            "output": ["sidewalk_tobias/concat1"],
+            "input_shapes": [[-1, 7, 7, 256]],
+            "output_shapes": [[-1, 56, 56, 256]],
+            "original_names": ["node_upsample_bilinear2d_3"],
+            "compilation_params": {
+                "hw_layer_type_list": ["lcu"]
+            },
+            "quantization_params": {},
+            "params": {
+                "resize_h_ratio_list": [8.0],
+                "resize_w_ratio_list": [8.0],
+                "resize_f_ratio_list": [1.0],
+                "method": "bilinear",
+                "resize_bilinear_pixels_mode": "half_pixels"
+            }
+        },
+        "sidewalk_tobias/concat1": {
+            "type": "concat",
+            "input": ["sidewalk_tobias/resize3", "sidewalk_tobias/resize2", "sidewalk_tobias/resize1", "sidewalk_tobias/format_conversion13"],
+            "output": ["sidewalk_tobias/conv63"],
+            "input_shapes": [[-1, 56, 56, 256], [-1, 56, 56, 256], [-1, 56, 56, 256], [-1, 56, 56, 256]],
+            "output_shapes": [[-1, 56, 56, 1024]],
+            "original_names": ["node_cat"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "concat_axis": "features"
+            }
+        },
+        "sidewalk_tobias/conv63": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/concat1"],
+            "output": ["sidewalk_tobias/conv64"],
+            "input_shapes": [[-1, 56, 56, 1024]],
+            "output_shapes": [[-1, 56, 56, 256]],
+            "original_names": ["node_Conv_812", "node_relu"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 1024, 256],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "relu"
+            }
+        },
+        "sidewalk_tobias/conv64": {
+            "type": "conv",
+            "input": ["sidewalk_tobias/conv63"],
+            "output": ["sidewalk_tobias/output_layer1"],
+            "input_shapes": [[-1, 56, 56, 256]],
+            "output_shapes": [[-1, 56, 56, 35]],
+            "original_names": ["node_conv2d_19"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "params": {
+                "kernel_shape": [1, 1, 256, 35],
+                "strides": [1, 1, 1, 1],
+                "dilations": [1, 1, 1, 1],
+                "padding": "VALID",
+                "groups": 1,
+                "layer_disparity": 1,
+                "input_disparity": 1,
+                "batch_norm": false,
+                "elementwise_add": false,
+                "activation": "linear"
+            }
+        },
+        "sidewalk_tobias/output_layer1": {
+            "type": "output_layer",
+            "input": ["sidewalk_tobias/conv64"],
+            "output": [],
+            "input_shapes": [[-1, 56, 56, 35]],
+            "output_shapes": [[-1, 56, 56, 35]],
+            "original_names": ["logits"],
+            "compilation_params": {},
+            "quantization_params": {},
+            "transposed": false,
+            "engine": "nn_core",
+            "io_type": "standard"
+        }
+    }
+}
