@@ -2,20 +2,6 @@
 
 ## Berbasis Artificial Intelligence dengan Output Bone Conduction sebagai Solusi Navigasi Mandiri Tunanetra Secara Real-Time
 
-```{=html}
-<p align="center">
-```
-`<strong>`{=html}Smart Vision Satria
-Navigait`</strong>`{=html}`<br>`{=html} Sistem navigasi berbasis
-Artificial Intelligence (AI) untuk membantu pengguna tunanetra
-memperoleh informasi kondisi lingkungan secara real-time melalui
-keluaran suara menggunakan teknologi bone conduction.
-```{=html}
-</p>
-```
-
-------------------------------------------------------------------------
-
 ## 📌 Deskripsi Proyek
 
 **Smart Vision Satria Navigait** merupakan sebuah sistem berbasis
