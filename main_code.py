@@ -18,7 +18,7 @@ import time
 
 
 # ============================================================
-# 2. CONFIGURATION
+# 2. KONFIGURASI SISTEM
 # ============================================================
 
 # ------------------------------------------------------------
@@ -29,7 +29,7 @@ MODEL_PATH = "./model_tobias/sidewalk_tobias.onnx"
 
 
 # ------------------------------------------------------------
-# Camera
+# Kamera
 # ------------------------------------------------------------
 
 CAMERA_INDEX = 0
@@ -39,7 +39,7 @@ FRAME_HEIGHT = 480
 
 
 # ------------------------------------------------------------
-# Model input
+# Ukuran input model
 # ------------------------------------------------------------
 
 MODEL_WIDTH = 224
@@ -47,10 +47,9 @@ MODEL_HEIGHT = 224
 
 
 # ------------------------------------------------------------
-# Class SegFormer
+# Class hasil segmentasi SegFormer
 # ------------------------------------------------------------
 
-UNLABELED_CLASS = 0
 SIDEWALK_CLASS = 2
 PERSON_CLASS = 8
 
@@ -64,48 +63,73 @@ NUM_COLUMNS = 5
 
 
 # ------------------------------------------------------------
-# Decision threshold
+# Threshold keputusan B4
+#
+# B4 > 8%  = jalan masih lurus
+# B4 <= 8% = sidewalk berakhir
 # ------------------------------------------------------------
 
-B4_THRESHOLD = 2.0
+B4_THRESHOLD = 8.0
 
 
 # ------------------------------------------------------------
-# Person detection
+# Minimum luas objek manusia
 # ------------------------------------------------------------
 
 MIN_PERSON_AREA = 100
 
 
 # ------------------------------------------------------------
-# Audio
+# Interval audio
 # ------------------------------------------------------------
+
+AUDIO_INTERVAL = 3.0
+
+
+# ============================================================
+# 3. KONFIGURASI AUDIO
+# ============================================================
 
 AUDIO_DIR = "./audio"
 
-AUDIO_JALAN_TERUS = os.path.join(
+
+# ------------------------------------------------------------
+# Audio yang tersedia pada repository
+# ------------------------------------------------------------
+
+AUDIO_ADA_ORANG = os.path.join(
     AUDIO_DIR,
-    "audio_jalan_terus.wav"
+    "ada_orang.mp3"
 )
 
-AUDIO_PELAN = os.path.join(
+AUDIO_BELOK_KANAN = os.path.join(
     AUDIO_DIR,
-    "audio_pelan_pelan_tidak_ada_sidewalk.wav"
-)
-
-AUDIO_BELok_KANAN = os.path.join(
-    AUDIO_DIR,
-    "audio_coba_belok_kanan.wav"
+    "belok kanan.mp3"
 )
 
 AUDIO_BELOK_KIRI = os.path.join(
     AUDIO_DIR,
-    "audio_coba_belok_kiri_180.wav"
+    "belok kiri.mp3"
+)
+
+AUDIO_BERHENTI = os.path.join(
+    AUDIO_DIR,
+    "berhenti.mp3"
+)
+
+AUDIO_LURUS = os.path.join(
+    AUDIO_DIR,
+    "lurus.mp3"
+)
+
+AUDIO_PUTAR_BALIK = os.path.join(
+    AUDIO_DIR,
+    "putar balik.mp3"
 )
 
 
 # ============================================================
-# 3. AUDIO INITIALIZATION
+# 4. INISIALISASI AUDIO
 # ============================================================
 
 print("=" * 60)
@@ -114,11 +138,42 @@ print("=" * 60)
 
 pygame.mixer.init()
 
-print("Audio system initialized.")
+print("[AUDIO] Audio system initialized.")
+
+
+# ------------------------------------------------------------
+# Cek file audio
+# ------------------------------------------------------------
+
+audio_files = [
+    AUDIO_ADA_ORANG,
+    AUDIO_BELOK_KANAN,
+    AUDIO_BELOK_KIRI,
+    AUDIO_BERHENTI,
+    AUDIO_LURUS,
+    AUDIO_PUTAR_BALIK
+]
+
+
+for audio_file in audio_files:
+
+    if os.path.exists(audio_file):
+
+        print(
+            "[AUDIO] OK :",
+            audio_file
+        )
+
+    else:
+
+        print(
+            "[AUDIO] MISSING :",
+            audio_file
+        )
 
 
 # ============================================================
-# 4. AUDIO FUNCTION
+# 5. FUNGSI MEMUTAR AUDIO
 # ============================================================
 
 def play_audio(audio_path):
@@ -136,6 +191,7 @@ def play_audio(audio_path):
 
         return
 
+
     try:
 
         pygame.mixer.music.load(
@@ -152,18 +208,31 @@ def play_audio(audio_path):
     except Exception as e:
 
         print(
-            "[AUDIO ERROR]",
+            "[AUDIO ERROR]:",
             e
         )
 
 
 # ============================================================
-# 5. LOAD MODEL
+# 6. LOAD MODEL ONNX
 # ============================================================
 
+print()
 print("=" * 60)
-print("LOADING MODEL")
+print("LOADING ONNX MODEL")
 print("=" * 60)
+
+
+if not os.path.exists(MODEL_PATH):
+
+    raise FileNotFoundError(
+        f"Model tidak ditemukan: {MODEL_PATH}"
+    )
+
+
+# ------------------------------------------------------------
+# ONNX Runtime menggunakan CPU Raspberry Pi
+# ------------------------------------------------------------
 
 session = ort.InferenceSession(
     MODEL_PATH,
@@ -173,9 +242,9 @@ session = ort.InferenceSession(
 )
 
 
-# ------------------------------------------------------------
-# Model information
-# ------------------------------------------------------------
+# ============================================================
+# 7. INFORMASI MODEL
+# ============================================================
 
 input_info = session.get_inputs()[0]
 
@@ -214,17 +283,19 @@ print(
 
 
 # ============================================================
-# 6. PREPROCESSING IMAGE
+# 8. PREPROCESSING FRAME
 # ============================================================
 
 def preprocess(frame):
 
     """
-    Mengubah frame kamera menjadi format
-    yang sesuai dengan input model.
+    Preprocessing frame kamera sebelum
+    masuk ke model SegFormer.
     """
 
+    # --------------------------------------------------------
     # BGR -> RGB
+    # --------------------------------------------------------
 
     image = cv2.cvtColor(
         frame,
@@ -232,28 +303,39 @@ def preprocess(frame):
     )
 
 
+    # --------------------------------------------------------
     # Resize
+    # --------------------------------------------------------
 
     image = cv2.resize(
         image,
         (
             MODEL_WIDTH,
             MODEL_HEIGHT
-        )
+        ),
+        interpolation=cv2.INTER_LINEAR
     )
 
 
-    # Float32
+    # --------------------------------------------------------
+    # Convert ke float32
+    # --------------------------------------------------------
 
     image = image.astype(
         np.float32
     )
 
 
-    # Normalisasi ImageNet
+    # --------------------------------------------------------
+    # Normalisasi 0-1
+    # --------------------------------------------------------
 
     image = image / 255.0
 
+
+    # --------------------------------------------------------
+    # ImageNet normalization
+    # --------------------------------------------------------
 
     mean = np.array(
         [
@@ -280,7 +362,9 @@ def preprocess(frame):
     ) / std
 
 
+    # --------------------------------------------------------
     # HWC -> CHW
+    # --------------------------------------------------------
 
     image = np.transpose(
         image,
@@ -292,7 +376,9 @@ def preprocess(frame):
     )
 
 
-    # Tambahkan batch
+    # --------------------------------------------------------
+    # Tambahkan batch dimension
+    # --------------------------------------------------------
 
     image = np.expand_dims(
         image,
@@ -306,20 +392,28 @@ def preprocess(frame):
 
 
 # ============================================================
-# 7. SEGMENTATION
+# 9. INFERENSI SEGMENTASI
 # ============================================================
 
 def run_segmentation(frame):
 
     """
-    Menjalankan inferensi SegFormer
-    menggunakan ONNX Runtime.
+    Menjalankan model SegFormer ONNX
+    untuk mendapatkan hasil segmentasi.
     """
+
+    # --------------------------------------------------------
+    # Preprocessing
+    # --------------------------------------------------------
 
     input_tensor = preprocess(
         frame
     )
 
+
+    # --------------------------------------------------------
+    # Inference
+    # --------------------------------------------------------
 
     outputs = session.run(
         [OUTPUT_NAME],
@@ -334,8 +428,7 @@ def run_segmentation(frame):
 
 
     # --------------------------------------------------------
-    # Output:
-    # [1, class, height, width]
+    # Ambil class dengan nilai terbesar
     # --------------------------------------------------------
 
     prediction = np.argmax(
@@ -344,7 +437,10 @@ def run_segmentation(frame):
     )[0]
 
 
-    # Resize segmentation ke ukuran frame
+    # --------------------------------------------------------
+    # Resize hasil segmentasi
+    # ke ukuran frame kamera
+    # --------------------------------------------------------
 
     prediction = cv2.resize(
         prediction.astype(
@@ -362,7 +458,7 @@ def run_segmentation(frame):
 
 
 # ============================================================
-# 8. CREATE SIDEWALK MASK
+# 10. MEMBUAT MASK SIDEWALK
 # ============================================================
 
 def create_sidewalk_mask(
@@ -370,10 +466,11 @@ def create_sidewalk_mask(
 ):
 
     """
-    Membuat mask khusus sidewalk.
+    Mengambil class sidewalk
+    dari hasil segmentasi.
     """
 
-    mask = (
+    sidewalk_mask = (
         prediction ==
         SIDEWALK_CLASS
     ).astype(
@@ -381,11 +478,11 @@ def create_sidewalk_mask(
     )
 
 
-    return mask
+    return sidewalk_mask
 
 
 # ============================================================
-# 9. CREATE PERSON MASK
+# 11. MEMBUAT MASK PERSON
 # ============================================================
 
 def create_person_mask(
@@ -393,10 +490,11 @@ def create_person_mask(
 ):
 
     """
-    Membuat mask khusus manusia.
+    Mengambil class person
+    dari hasil segmentasi.
     """
 
-    mask = (
+    person_mask = (
         prediction ==
         PERSON_CLASS
     ).astype(
@@ -404,11 +502,11 @@ def create_person_mask(
     )
 
 
-    return mask
+    return person_mask
 
 
 # ============================================================
-# 10. GRID BANDS
+# 12. MENGHITUNG PERSENTASE SIDEWALK PER BAND
 # ============================================================
 
 def calculate_bands(
@@ -440,6 +538,10 @@ def calculate_bands(
         NUM_BANDS
     ):
 
+        # ----------------------------------------------------
+        # Batas band
+        # ----------------------------------------------------
+
         y_start = int(
             i *
             band_height
@@ -458,19 +560,35 @@ def calculate_bands(
             )
 
 
+        # ----------------------------------------------------
+        # Ambil area band
+        # ----------------------------------------------------
+
         band = sidewalk_mask[
             y_start:y_end,
             :
         ]
 
 
+        # ----------------------------------------------------
+        # Hitung pixel sidewalk
+        # ----------------------------------------------------
+
         sidewalk_pixels = np.sum(
             band == 1
         )
 
 
+        # ----------------------------------------------------
+        # Total pixel
+        # ----------------------------------------------------
+
         total_pixels = band.size
 
+
+        # ----------------------------------------------------
+        # Persentase sidewalk
+        # ----------------------------------------------------
 
         percentage = (
             sidewalk_pixels /
@@ -487,7 +605,7 @@ def calculate_bands(
 
 
 # ============================================================
-# 11. DRAW BAND GRID
+# 13. MENGGAMBAR GRID 6 BAND
 # ============================================================
 
 def draw_bands(
@@ -495,8 +613,8 @@ def draw_bands(
 ):
 
     """
-    Menggambar 6 garis horizontal
-    pada frame.
+    Membuat 6 pembagian horizontal:
+    B1 sampai B6.
     """
 
     height, width = (
@@ -530,17 +648,32 @@ def draw_bands(
         )
 
 
+    # --------------------------------------------------------
+    # Label band
+    # --------------------------------------------------------
+
+    for i in range(
+        NUM_BANDS
+    ):
+
+        y = int(
+            i *
+            band_height
+        )
+
+
         cv2.putText(
             frame,
-            f"B{i}",
+            f"B{i + 1}",
             (
                 10,
-                y - 5
+                y + 25
             ),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.6,
             (0, 255, 255),
-            2
+            2,
+            cv2.LINE_AA
         )
 
 
@@ -548,7 +681,7 @@ def draw_bands(
 
 
 # ============================================================
-# 12. GRID COLUMNS
+# 14. MENGGAMBAR GRID 5 KOLOM
 # ============================================================
 
 def draw_columns(
@@ -556,10 +689,12 @@ def draw_columns(
 ):
 
     """
-    Membagi gambar menjadi 5 kolom.
+    Membagi gambar menjadi 5 kolom:
 
     C1 = kiri
+    C2 = kiri tengah
     C3 = tengah
+    C4 = kanan tengah
     C5 = kanan
     """
 
@@ -573,6 +708,10 @@ def draw_columns(
         NUM_COLUMNS
     )
 
+
+    # --------------------------------------------------------
+    # Garis vertikal
+    # --------------------------------------------------------
 
     for i in range(
         1,
@@ -594,6 +733,10 @@ def draw_columns(
         )
 
 
+    # --------------------------------------------------------
+    # Label kolom
+    # --------------------------------------------------------
+
     for i in range(
         NUM_COLUMNS
     ):
@@ -614,7 +757,8 @@ def draw_columns(
             cv2.FONT_HERSHEY_SIMPLEX,
             0.7,
             (255, 255, 0),
-            2
+            2,
+            cv2.LINE_AA
         )
 
 
@@ -622,7 +766,7 @@ def draw_columns(
 
 
 # ============================================================
-# 13. PERSON + CENTROID
+# 15. DETEKSI PERSON DAN CENTROID
 # ============================================================
 
 def detect_person(
@@ -631,8 +775,7 @@ def detect_person(
 ):
 
     """
-    Mendeteksi objek manusia menggunakan
-    connected components.
+    Mendeteksi area manusia dari person mask.
 
     Centroid digunakan untuk menentukan
     posisi manusia pada kolom C1-C5.
@@ -649,11 +792,18 @@ def detect_person(
     )
 
 
-    num_labels, labels, stats, centroids = (
-        cv2.connectedComponentsWithStats(
-            person_mask,
-            connectivity=8
-        )
+    # --------------------------------------------------------
+    # Connected Components
+    # --------------------------------------------------------
+
+    (
+        num_labels,
+        labels,
+        stats,
+        centroids
+    ) = cv2.connectedComponentsWithStats(
+        person_mask,
+        connectivity=8
     )
 
 
@@ -661,6 +811,10 @@ def detect_person(
 
     person_columns = []
 
+
+    # --------------------------------------------------------
+    # Proses setiap objek
+    # --------------------------------------------------------
 
     for label_id in range(
         1,
@@ -673,7 +827,9 @@ def detect_person(
         ]
 
 
-        # Abaikan objek kecil
+        # ----------------------------------------------------
+        # Abaikan objek terlalu kecil
+        # ----------------------------------------------------
 
         if area < MIN_PERSON_AREA:
 
@@ -719,7 +875,7 @@ def detect_person(
 
 
         # ----------------------------------------------------
-        # Bounding Box
+        # Bounding box
         # ----------------------------------------------------
 
         x = stats[
@@ -753,7 +909,7 @@ def detect_person(
 
 
         # ----------------------------------------------------
-        # Centroid
+        # Gambar centroid
         # ----------------------------------------------------
 
         cv2.circle(
@@ -769,7 +925,7 @@ def detect_person(
 
 
         # ----------------------------------------------------
-        # Label
+        # Label person
         # ----------------------------------------------------
 
         cv2.putText(
@@ -785,7 +941,8 @@ def detect_person(
             cv2.FONT_HERSHEY_SIMPLEX,
             0.6,
             (255, 0, 255),
-            2
+            2,
+            cv2.LINE_AA
         )
 
 
@@ -796,99 +953,7 @@ def detect_person(
 
 
 # ============================================================
-# 14. DECISION MAKING
-# ============================================================
-
-def decision_making(
-    band_percentages,
-    person_columns
-):
-
-    """
-    Menentukan keputusan alat berdasarkan:
-
-    1. Kondisi sidewalk pada B4
-    2. Keberadaan manusia pada C3
-    """
-
-
-    # --------------------------------------------------------
-    # B4
-    # --------------------------------------------------------
-
-    B4 = band_percentages[3]
-
-
-    # --------------------------------------------------------
-    # Person di tengah
-    # --------------------------------------------------------
-
-    person_in_middle = (
-        3 in person_columns
-    )
-
-
-    # --------------------------------------------------------
-    # Jalan masih lurus
-    # --------------------------------------------------------
-
-    jalan_masih_lurus = (
-        B4 > B4_THRESHOLD
-    )
-
-
-    # ========================================================
-    # PRIORITAS ORANG
-    # ========================================================
-
-    if person_in_middle:
-
-        decision = (
-            "ADA ORANG DI TENGAH"
-        )
-
-
-        audio = AUDIO_PELAN
-
-
-    # ========================================================
-    # SIDEWALK MASIH ADA
-    # ========================================================
-
-    elif jalan_masih_lurus:
-
-        decision = (
-            "JALAN MASIH LURUS"
-        )
-
-
-        audio = AUDIO_JALAN_TERUS
-
-
-    # ========================================================
-    # SIDEWALK HABIS
-    # ========================================================
-
-    else:
-
-        decision = (
-            "SIDEWALK BERAKHIR"
-        )
-
-
-        audio = AUDIO_BELOK_KIRI
-
-
-    return (
-        decision,
-        audio,
-        jalan_masih_lurus,
-        person_in_middle
-    )
-
-
-# ============================================================
-# 15. DRAW SEGMENTATION
+# 16. VISUALISASI HASIL SEGMENTASI
 # ============================================================
 
 def draw_segmentation(
@@ -907,7 +972,9 @@ def draw_segmentation(
     overlay = frame.copy()
 
 
+    # --------------------------------------------------------
     # Sidewalk
+    # --------------------------------------------------------
 
     overlay[
         sidewalk_mask == 1
@@ -918,7 +985,9 @@ def draw_segmentation(
     )
 
 
+    # --------------------------------------------------------
     # Person
+    # --------------------------------------------------------
 
     overlay[
         person_mask == 1
@@ -928,6 +997,10 @@ def draw_segmentation(
         255
     )
 
+
+    # --------------------------------------------------------
+    # Gabungkan dengan frame asli
+    # --------------------------------------------------------
 
     result = cv2.addWeighted(
         frame,
@@ -942,9 +1015,120 @@ def draw_segmentation(
 
 
 # ============================================================
-# 16. CAMERA INITIALIZATION
+# 17. DECISION MAKING
 # ============================================================
 
+def decision_making(
+    band_percentages,
+    person_columns
+):
+
+    """
+    Decision making sistem.
+
+    Aturan utama:
+
+    1. Person berada di C3
+       -> Ada orang di tengah
+       -> Audio ada_orang.mp3
+
+    2. Tidak ada person di C3 dan B4 > 8%
+       -> Jalan masih lurus
+       -> Audio lurus.mp3
+
+    3. Tidak ada person di C3 dan B4 <= 8%
+       -> Sidewalk berakhir
+       -> Audio berhenti.mp3
+    """
+
+
+    # --------------------------------------------------------
+    # Ambil B4
+    # --------------------------------------------------------
+
+    B4 = band_percentages[3]
+
+
+    # --------------------------------------------------------
+    # Cek person di tengah
+    # C3 = kolom nomor 3
+    # --------------------------------------------------------
+
+    person_in_middle = (
+        3 in person_columns
+    )
+
+
+    # --------------------------------------------------------
+    # Kondisi jalan
+    # --------------------------------------------------------
+
+    jalan_masih_lurus = (
+        B4 > B4_THRESHOLD
+    )
+
+
+    # ========================================================
+    # PRIORITAS 1
+    # ADA ORANG DI TENGAH
+    # ========================================================
+
+    if person_in_middle:
+
+        decision = (
+            "ADA ORANG DI TENGAH"
+        )
+
+        audio = (
+            AUDIO_ADA_ORANG
+        )
+
+
+    # ========================================================
+    # PRIORITAS 2
+    # JALAN MASIH LURUS
+    # ========================================================
+
+    elif jalan_masih_lurus:
+
+        decision = (
+            "JALAN MASIH LURUS"
+        )
+
+        audio = (
+            AUDIO_LURUS
+        )
+
+
+    # ========================================================
+    # PRIORITAS 3
+    # SIDEWALK BERAKHIR
+    # ========================================================
+
+    else:
+
+        decision = (
+            "SIDEWALK BERAKHIR"
+        )
+
+        audio = (
+            AUDIO_BERHENTI
+        )
+
+
+    return (
+        decision,
+        audio,
+        jalan_masih_lurus,
+        person_in_middle
+    )
+
+
+# ============================================================
+# 18. INISIALISASI CAMERA
+# ============================================================
+
+print()
 print("=" * 60)
 print("STARTING CAMERA")
 print("=" * 60)
@@ -974,31 +1158,42 @@ if not cap.isOpened():
 
 
 print(
-    "Camera started."
+    "[CAMERA] Camera started."
 )
 
 
 # ============================================================
-# 17. MAIN STREAMING LOOP
+# 19. MAIN STREAMING LOOP
 # ============================================================
 
+print()
 print("=" * 60)
 print("SIDEWALK SYSTEM RUNNING")
 print("=" * 60)
 
+print(
+    "Tekan Q untuk keluar."
+)
 
-last_audio = None
+
+# ------------------------------------------------------------
+# Variabel audio
+# ------------------------------------------------------------
+
+last_decision = None
 
 last_audio_time = 0
 
-AUDIO_INTERVAL = 3.0
 
+# ============================================================
+# LOOP UTAMA
+# ============================================================
 
 while True:
 
-    # --------------------------------------------------------
-    # Capture frame
-    # --------------------------------------------------------
+    # ========================================================
+    # 19.1 CAPTURE FRAME
+    # ========================================================
 
     ret, frame = cap.read()
 
@@ -1006,24 +1201,24 @@ while True:
     if not ret:
 
         print(
-            "Gagal membaca frame."
+            "[CAMERA] Gagal membaca frame."
         )
 
         break
 
 
-    # --------------------------------------------------------
-    # Segmentation
-    # --------------------------------------------------------
+    # ========================================================
+    # 19.2 SEGMENTATION
+    # ========================================================
 
     prediction = run_segmentation(
         frame
     )
 
 
-    # --------------------------------------------------------
-    # Masks
-    # --------------------------------------------------------
+    # ========================================================
+    # 19.3 SIDEWALK MASK
+    # ========================================================
 
     sidewalk_mask = (
         prediction ==
@@ -1033,6 +1228,10 @@ while True:
     )
 
 
+    # ========================================================
+    # 19.4 PERSON MASK
+    # ========================================================
+
     person_mask = (
         prediction ==
         PERSON_CLASS
@@ -1041,9 +1240,9 @@ while True:
     )
 
 
-    # --------------------------------------------------------
-    # Draw segmentation
-    # --------------------------------------------------------
+    # ========================================================
+    # 19.5 VISUALISASI SEGMENTASI
+    # ========================================================
 
     result = draw_segmentation(
         frame,
@@ -1052,9 +1251,9 @@ while True:
     )
 
 
-    # --------------------------------------------------------
-    # Band analysis
-    # --------------------------------------------------------
+    # ========================================================
+    # 19.6 HITUNG BAND
+    # ========================================================
 
     band_percentages = (
         calculate_bands(
@@ -1063,26 +1262,31 @@ while True:
     )
 
 
-    # --------------------------------------------------------
-    # Person detection
-    # --------------------------------------------------------
+    # ========================================================
+    # 19.7 DETEKSI PERSON
+    # ========================================================
 
-    person_count, person_columns = (
-        detect_person(
-            person_mask,
-            result
-        )
+    (
+        person_count,
+        person_columns
+    ) = detect_person(
+        person_mask,
+        result
     )
 
 
-    # --------------------------------------------------------
-    # Draw grid
-    # --------------------------------------------------------
+    # ========================================================
+    # 19.8 GRID BAND
+    # ========================================================
 
     result = draw_bands(
         result
     )
 
+
+    # ========================================================
+    # 19.9 GRID COLUMN
+    # ========================================================
 
     result = draw_columns(
         result
@@ -1090,7 +1294,7 @@ while True:
 
 
     # ========================================================
-    # DECISION MAKING
+    # 19.10 DECISION MAKING
     # ========================================================
 
     (
@@ -1105,17 +1309,22 @@ while True:
 
 
     # ========================================================
-    # AUDIO CONTROL
+    # 19.11 AUDIO CONTROL
     # ========================================================
 
     current_time = time.time()
 
 
+    # Audio dimainkan ketika decision berubah
+    # dan sudah melewati interval minimum.
+
     if (
-        decision != last_audio
+        decision != last_decision
         and
-        current_time - last_audio_time
-        >= AUDIO_INTERVAL
+        (
+            current_time -
+            last_audio_time
+        ) >= AUDIO_INTERVAL
     ):
 
         play_audio(
@@ -1123,7 +1332,7 @@ while True:
         )
 
 
-        last_audio = decision
+        last_decision = decision
 
         last_audio_time = (
             current_time
@@ -1131,7 +1340,7 @@ while True:
 
 
     # ========================================================
-    # DISPLAY BAND INFORMATION
+    # 19.12 TAMPILKAN PERSENTASE BAND
     # ========================================================
 
     for i, percentage in enumerate(
@@ -1143,17 +1352,18 @@ while True:
             f"B{i + 1}: {percentage:.1f}%",
             (
                 10,
-                55 + i * 25
+                55 + i * 24
             ),
             cv2.FONT_HERSHEY_SIMPLEX,
-            0.55,
+            0.52,
             (0, 255, 255),
-            2
+            2,
+            cv2.LINE_AA
         )
 
 
     # ========================================================
-    # DISPLAY PERSON INFORMATION
+    # 19.13 TAMPILKAN PERSON
     # ========================================================
 
     cv2.putText(
@@ -1164,11 +1374,16 @@ while True:
             FRAME_HEIGHT - 90
         ),
         cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
+        0.65,
         (255, 255, 255),
-        2
+        2,
+        cv2.LINE_AA
     )
 
+
+    # --------------------------------------------------------
+    # Kolom person
+    # --------------------------------------------------------
 
     cv2.putText(
         result,
@@ -1178,39 +1393,27 @@ while True:
             FRAME_HEIGHT - 60
         ),
         cv2.FONT_HERSHEY_SIMPLEX,
-        0.7,
+        0.65,
         (255, 255, 255),
-        2
+        2,
+        cv2.LINE_AA
     )
 
 
     # ========================================================
-    # DISPLAY FINAL STATUS
+    # 19.14 STATUS JALAN
     # ========================================================
 
     if jalan_masih_lurus:
 
         road_text = (
-            "JALAN LURUS: TRUE"
+            "JALAN MASIH LURUS: TRUE"
         )
 
     else:
 
         road_text = (
-            "JALAN LURUS: FALSE"
-        )
-
-
-    if person_in_middle:
-
-        person_text = (
-            "ORANG TENGAH: TRUE"
-        )
-
-    else:
-
-        person_text = (
-            "ORANG TENGAH: FALSE"
+            "JALAN MASIH LURUS: FALSE"
         )
 
 
@@ -1222,10 +1425,28 @@ while True:
             FRAME_HEIGHT - 90
         ),
         cv2.FONT_HERSHEY_SIMPLEX,
-        0.65,
+        0.60,
         (0, 255, 0),
-        2
+        2,
+        cv2.LINE_AA
     )
+
+
+    # ========================================================
+    # 19.15 STATUS ORANG TENGAH
+    # ========================================================
+
+    if person_in_middle:
+
+        person_text = (
+            "ADA ORANG DI TENGAH: TRUE"
+        )
+
+    else:
+
+        person_text = (
+            "ADA ORANG DI TENGAH: FALSE"
+        )
 
 
     cv2.putText(
@@ -1236,14 +1457,15 @@ while True:
             FRAME_HEIGHT - 60
         ),
         cv2.FONT_HERSHEY_SIMPLEX,
-        0.65,
+        0.60,
         (0, 0, 255),
-        2
+        2,
+        cv2.LINE_AA
     )
 
 
     # ========================================================
-    # DISPLAY DECISION
+    # 19.16 TAMPILKAN DECISION
     # ========================================================
 
     cv2.putText(
@@ -1254,14 +1476,34 @@ while True:
             FRAME_HEIGHT - 20
         ),
         cv2.FONT_HERSHEY_SIMPLEX,
-        0.8,
+        0.75,
         (0, 255, 255),
-        2
+        2,
+        cv2.LINE_AA
     )
 
 
     # ========================================================
-    # DISPLAY
+    # 19.17 TAMPILKAN B4
+    # ========================================================
+
+    cv2.putText(
+        result,
+        f"B4 THRESHOLD: {B4_THRESHOLD:.0f}%",
+        (
+            400,
+            30
+        ),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.55,
+        (255, 255, 255),
+        2,
+        cv2.LINE_AA
+    )
+
+
+    # ========================================================
+    # 19.18 DISPLAY
     # ========================================================
 
     cv2.imshow(
@@ -1270,9 +1512,9 @@ while True:
     )
 
 
-    # --------------------------------------------------------
-    # Quit
-    # --------------------------------------------------------
+    # ========================================================
+    # 19.19 KEYBOARD CONTROL
+    # ========================================================
 
     key = cv2.waitKey(1)
 
@@ -1283,7 +1525,7 @@ while True:
 
 
 # ============================================================
-# 18. CLEANUP
+# 20. CLEANUP
 # ============================================================
 
 print()
@@ -1300,5 +1542,5 @@ pygame.mixer.quit()
 
 
 print(
-    "System stopped."
+    "[SYSTEM] System stopped."
 )
